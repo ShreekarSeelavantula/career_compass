@@ -1,0 +1,341 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(248 10% 98%);
+  --foreground: hsl(215 20% 17%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(215 20% 17%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(215 20% 17%);
+  --primary: hsl(220 100% 60%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(215 20% 17%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(210 40% 96%);
+  --muted-foreground: hsl(215 16% 47%);
+  --accent: hsl(162 76% 36%);
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(214 32% 91%);
+  --input: hsl(214 32% 91%);
+  --ring: hsl(220 100% 60%);
+  --chart-1: hsl(220 100% 60%);
+  --chart-2: hsl(162 76% 36%);
+  --chart-3: hsl(42 92% 56%);
+  --chart-4: hsl(147 79% 42%);
+  --chart-5: hsl(341 75% 51%);
+  --sidebar: hsl(0 0% 100%);
+  --sidebar-foreground: hsl(215 20% 17%);
+  --sidebar-primary: hsl(220 100% 60%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(210 40% 96%);
+  --sidebar-accent-foreground: hsl(220 100% 60%);
+  --sidebar-border: hsl(214 32% 91%);
+  --sidebar-ring: hsl(220 100% 60%);
+  --font-sans: Inter, system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(224 71% 4%);
+  --foreground: hsl(213 31% 91%);
+  --card: hsl(224 71% 4%);
+  --card-foreground: hsl(213 31% 91%);
+  --popover: hsl(224 71% 4%);
+  --popover-foreground: hsl(213 31% 91%);
+  --primary: hsl(220 100% 60%);
+  --primary-foreground: hsl(220 26% 14%);
+  --secondary: hsl(215 27% 32%);
+  --secondary-foreground: hsl(210 40% 98%);
+  --muted: hsl(223 47% 11%);
+  --muted-foreground: hsl(215 16% 57%);
+  --accent: hsl(162 76% 36%);
+  --accent-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0 63% 31%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(216 34% 17%);
+  --input: hsl(216 34% 17%);
+  --ring: hsl(220 100% 60%);
+  --chart-1: hsl(220 70% 50%);
+  --chart-2: hsl(160 60% 45%);
+  --chart-3: hsl(30 80% 55%);
+  --chart-4: hsl(280 65% 60%);
+  --chart-5: hsl(340 75% 55%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Hero gradient matching the design reference */
+.hero-gradient {
+  background: linear-gradient(135deg, hsl(220 100% 60%) 0%, hsl(220 100% 50%) 100%);
+}
+
+/* Feature card gradients */
+.feature-card-blue {
+  background: linear-gradient(135deg, hsl(220 100% 97%) 0%, hsl(220 100% 95%) 100%);
+  border-color: hsl(220 100% 90%);
+}
+
+.feature-card-green {
+  background: linear-gradient(135deg, hsl(162 100% 97%) 0%, hsl(162 100% 95%) 100%);
+  border-color: hsl(162 100% 90%);
+}
+
+.feature-card-purple {
+  background: linear-gradient(135deg, hsl(280 100% 97%) 0%, hsl(280 100% 95%) 100%);
+  border-color: hsl(280 100% 90%);
+}
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Loading animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Match score indicator */
+.match-score-high {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+.match-score-medium {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+}
+
+.match-score-low {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}
+
+/* Status badges */
+.status-applied {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+}
+
+.status-screening {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+}
+
+.status-shortlisted {
+  @apply bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200;
+}
+
+.status-interviewed {
+  @apply bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200;
+}
+
+.status-offered {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+.status-rejected {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}
+
+/* Chat message styles */
+.chat-message-sent {
+  @apply bg-primary text-primary-foreground ml-auto max-w-[80%];
+}
+
+.chat-message-received {
+  @apply bg-muted text-muted-foreground mr-auto max-w-[80%];
+}
+
+/* File upload area */
+.file-upload-area {
+  @apply border-2 border-dashed border-border hover:border-primary transition-colors duration-200;
+}
+
+.file-upload-area.drag-over {
+  @apply border-primary bg-primary/5;
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Focus styles for accessibility */
+.focus-visible {
+  @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+}
+
+/* Text truncation utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Glassmorphism effect for cards */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-effect {
+  background: rgba(0, 0, 0, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Custom button hover effects */
+.btn-primary-hover {
+  @apply bg-primary hover:bg-primary/90 text-primary-foreground transition-colors;
+}
+
+.btn-secondary-hover {
+  @apply bg-secondary hover:bg-secondary/90 text-secondary-foreground transition-colors;
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Notification dot */
+.notification-dot {
+  @apply absolute -top-1 -right-1 h-3 w-3 bg-destructive rounded-full border-2 border-background;
+}
+
+/* Interview status colors */
+.interview-scheduled {
+  @apply bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200;
+}
+
+.interview-completed {
+  @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+.interview-cancelled {
+  @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}
+
+.interview-rescheduled {
+  @apply bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200;
+}
+
+/* Skill tag styles */
+.skill-tag {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary;
+}
+
+/* Resume upload progress */
+.upload-progress {
+  @apply w-full bg-muted rounded-full h-2 overflow-hidden;
+}
+
+.upload-progress-bar {
+  @apply h-full bg-primary transition-all duration-300 ease-out;
+}
+
+/* Mobile-first responsive utilities */
+@media (max-width: 768px) {
+  .mobile-padding {
+    @apply px-4;
+  }
+  
+  .mobile-text {
+    @apply text-sm;
+  }
+  
+  .mobile-grid {
+    @apply grid-cols-1 gap-4;
+  }
+}
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  .auto-dark {
+    @apply dark:bg-background dark:text-foreground;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .high-contrast {
+    @apply border-2 border-foreground;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
