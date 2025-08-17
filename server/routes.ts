@@ -65,8 +65,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Jobs routes - placeholder for now
+  // User profile route
+  app.get('/api/me', (req, res) => {
+    // Mock user data for now
+    res.json({
+      id: "user-123",
+      email: "user@example.com",
+      full_name: "John Doe",
+      role: "seeker"
+    });
+  });
+
+  // Jobs routes
   app.get('/api/jobs', (req, res) => {
+    res.json([]);
+  });
+
+  app.get('/api/jobs/recommendations', (req, res) => {
+    // Return empty array for now
     res.json([]);
   });
 
@@ -74,13 +90,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(501).json({ error: 'Not implemented yet' });
   });
 
-  // Applications routes - placeholder for now
+  // Applications routes
   app.get('/api/applications', (req, res) => {
+    res.json([]);
+  });
+
+  app.get('/api/applications/me', (req, res) => {
+    // Return empty array for applications
     res.json([]);
   });
 
   app.post('/api/applications', (req, res) => {
     res.status(501).json({ error: 'Not implemented yet' });
+  });
+
+  // Interviews routes
+  app.get('/api/interviews/me', (req, res) => {
+    // Return empty array for interviews
+    res.json([]);
   });
 
   // Chat/WebSocket will be handled separately

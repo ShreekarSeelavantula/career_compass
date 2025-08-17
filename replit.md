@@ -18,12 +18,19 @@ Preferred communication style: Simple, everyday language.
 - **Real-time Features**: WebSocket integration for chat functionality
 
 ### Backend Architecture
-- **Hybrid Backend**: 
-  - Node.js/Express server for development proxy and static file serving
-  - Django REST Framework as the main API backend with Django Channels for WebSocket support
-- **Authentication**: JWT-based authentication with middleware for protected routes
+- **Express Backend**: 
+  - Node.js/Express server for API routes, development proxy, and static file serving
+  - Direct authentication implementation with JWT-style tokens
+  - In-memory storage for development and demo purposes
+- **Authentication**: Simple token-based authentication for demo functionality
 - **File Storage**: Configurable storage (local filesystem or S3) for resume uploads
-- **Real-time Communication**: WebSocket support via Django Channels for chat functionality
+- **Real-time Communication**: WebSocket support planned for chat functionality
+
+### Migration Status (August 17, 2025)
+- **Migrated from Django hybrid to Express-only**: Replaced Django backend proxy with direct Express API implementation
+- **Authentication Working**: Registration and login endpoints functional with in-memory storage
+- **Frontend Issues Resolved**: Fixed JSX syntax errors and CSS compilation issues
+- **Demo Ready**: Basic authentication and dashboard functionality working
 
 ### Data Storage
 - **Primary Database**: Elasticsearch as the sole data store (no traditional SQL/NoSQL database)

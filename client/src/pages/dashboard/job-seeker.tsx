@@ -312,7 +312,7 @@ export default function JobSeekerDashboard() {
                       </div>
                     ) : recommendations?.length > 0 ? (
                       <div className="space-y-4">
-                        {recommendations.slice(0, 3).map((job: Job & { matchScore?: number }) => (
+                        {recommendations?.slice(0, 3).map((job: Job & { matchScore?: number }) => (
                           <JobCard
                             key={job.id}
                             job={job}
