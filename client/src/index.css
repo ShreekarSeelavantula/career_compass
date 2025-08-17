@@ -185,7 +185,7 @@
 }
 
 .file-upload-area.drag-over {
-  @apply border-primary bg-primary/5;
+  @apply border-primary bg-primary bg-opacity-5;
 }
 
 /* Smooth transitions */
@@ -237,11 +237,11 @@
 
 /* Custom button hover effects */
 .btn-primary-hover {
-  @apply bg-primary hover:bg-primary/90 text-primary-foreground transition-colors;
+  @apply bg-primary hover:bg-primary hover:bg-opacity-90 text-primary-foreground transition-colors;
 }
 
 .btn-secondary-hover {
-  @apply bg-secondary hover:bg-secondary/90 text-secondary-foreground transition-colors;
+  @apply bg-secondary hover:bg-secondary hover:bg-opacity-90 text-secondary-foreground transition-colors;
 }
 
 /* Loading spinner */
@@ -279,7 +279,7 @@
 
 /* Skill tag styles */
 .skill-tag {
-  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary;
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary bg-opacity-10 text-primary;
 }
 
 /* Resume upload progress */
