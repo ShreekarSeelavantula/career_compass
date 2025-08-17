@@ -1,0 +1,314 @@
+1) Goals & Scope
+Core users & flows
+
+Job Seeker: register, upload/update resume (PDF/DOCX), create profile, search/apply jobs, get AI match score, interview scheduling.
+
+Recruiter: register, create/manage job posts, shortlist via AI-ranked candidates, schedule interviews, manage pipeline.
+
+Admin: monitor system, manage abusive content, analytics (optional).
+
+Non-negotiables
+
+No traditional DB. Use only:
+
+Elasticsearch indices for documents (users, jobs, applications, schedules, logs).
+
+File storage (local or S3/GCS) for resume files and exports.
+
+Cache: in‑memory (Django cache or Redis—optional; if you consider Redis a DB, skip it).
+
+2) High-Level Architecture
+[React SPA]  ── REST/WS ──>  [Django API + Channels]
+                                 │
+                        [Elasticsearch cluster]
+                                 │
+                        [File storage for resumes]
+                                 │
+                         [ML Service/Module]
+
+
+React (Next.js optional) SPA: public landing, auth, dashboards, job browsing, candidate search, scheduling calendar, chat.
+
+Django (DRF) for REST APIs; Django Channels/Socket.IO via ASGI for real-time.
+
+Elasticsearch: primary and only data store (indices per entity).
+
+ML:
+
+Resume parsing (spaCy + regex + pdfminer/docx).
+
+Embeddings (e.g., Sentence-Transformers offline) for semantic matching (store vectors in ES using dense_vector).
+
+Ranking = lexical (BM25) + semantic (vector) + rule-based boosts.
+
+3) Data Model (Elasticsearch-only)
+Indices & mappings
+users
+
+id (keyword), role (keyword: seeker/recruiter/admin)
+
+email (keyword), password_hash (keyword) – (bcrypt/argon2)
+
+full_name (text), headline (text)
+
+skills (keyword), experience_years (integer), location (keyword)
+
+created_at (date), updated_at (date)
+
+resume_file_path (keyword)
+
+resume_text (text) ⟵ full parsed text
+
+resume_vec (dense_vector, dims=384 or 768)
+
+jobs
+
+id (keyword), recruiter_id (keyword)
+
+title (text), description (text), company (keyword)
+
+skills_required (keyword), min_exp (integer), location (keyword), employment_type (keyword)
+
+created_at (date), status (keyword: open/closed)
+
+job_vec (dense_vector)
+
+applications
+
+id (keyword)
+
+job_id (keyword), seeker_id (keyword), status (keyword: applied/screening/shortlisted/interviewed/offered/rejected)
+
+scores: object
+
+bm25 (float), semantic (float), rule_boost (float), final (float)
+
+created_at (date), updated_at (date)
+
+interviews
+
+id (keyword), job_id (keyword), seeker_id (keyword), recruiter_id (keyword)
+
+start_time (date), end_time (date), meeting_link (keyword), status (keyword: scheduled/rescheduled/cancelled/completed)
+
+notes (text)
+
+events (audit log / analytics)
+
+id (keyword), actor_id (keyword), type (keyword), payload (object), ts (date)
+
+All IDs are UUIDv4 generated in Django before indexing to ES.
+
+4) Search & Ranking
+Hybrid ranking (explainable + strong)
+
+Final score = 0.4 * BM25 + 0.5 * Semantic + 0.1 * RuleBoost.
+
+BM25: standard ES full-text on resume_text vs. job description/skills_required (or the inverse for candidate search).
+
+Semantic: cosine similarity between resume_vec and job_vec using ES knn_search or script_score.
+
+RuleBoost:
+
+Skill overlap Jaccard (skills intersection / union).
+
+Experience difference penalty (abs(resume_exp - job_min_exp)).
+
+Location match boost.
+
+Recency of last role boost.
+
+Example script_score (ES)
+
+Use knn (if your ES supports ANN) or a custom script_score combining stored dense_vector cosine with BM25 _score and params.
+
+5) ML Pipeline
+
+Resume ingestion
+
+Accept PDF/DOCX.
+
+Extract text: pdfminer.six (PDF) / python-docx (DOCX).
+
+Clean, segment sections (Education, Experience, Skills) via regex + simple heuristics.
+
+NER & skills normalization
+
+spaCy for entities (ORG, DATE, GPE).
+
+Skill dictionary (e.g., YAML list “python, django, react, elasticsearch, aws, …”).
+
+Embeddings
+
+Sentence embedding model (e.g., all-MiniLM-L6-v2 offline). Store 384‑dim vectors in ES dense_vector.
+
+Job vectors
+
+Build from title + description + skills_required.
+
+Scoring
+
+On job post or on application, compute BM25 + vector similarity + rule boosts.
+
+Feedback loop (optional)
+
+Track recruiter actions (shortlist/offer) to retrain weights.
+
+All of this runs inside Django or a small ML module called from Django. No external DB.
+
+6) Real-Time Features
+
+Interview scheduling:
+
+React calendar (e.g., FullCalendar).
+
+Availability slots stored in ES under interviews (proposed + confirmed).
+
+WebSocket updates (Django Channels) to both parties on create/reschedule/cancel.
+
+Live chat (per application)
+
+Channel key: job_id:seeker_id.
+
+Messages can be transient or also indexed into events for history.
+
+7) API Design (Django + DRF) — No DB models
+
+Use ES client directly; create lightweight repository classes to read/write indices.
+
+Auth
+
+POST /api/auth/register → creates users doc; hash password; return JWT.
+
+POST /api/auth/login → verify hash; return JWT.
+
+Job Seeker
+
+GET /api/me → profile from users.
+
+PUT /api/me → update basic info (skills, location, headline).
+
+POST /api/me/resume (multipart) → save file, parse, index resume_text + resume_vec.
+
+Jobs (Recruiter)
+
+POST /api/jobs → create jobs doc + job_vec.
+
+GET /api/jobs?query=...&location=... → BM25 + filters.
+
+PUT /api/jobs/{id} / DELETE /api/jobs/{id}.
+
+Apply & Ranking
+
+POST /api/jobs/{id}/apply → create applications doc and compute + store scores.
+
+GET /api/jobs/{id}/applications?sort=score → ES search with sort on scores.final.
+
+POST /api/jobs/{id}/rank (bulk) → re‑rank all candidates (e.g., after job edit).
+
+Candidate Search (Recruiter)
+
+GET /api/candidates?query=...&skills=... → hybrid search over users with role=seeker, sort by final rank vs. a given job (optional).
+
+Scheduling
+
+POST /api/interviews {job_id, seeker_id, start, end} → create; push WS updates; generate meeting_link.
+
+PUT /api/interviews/{id} → reschedule/cancel.
+
+GET /api/interviews?for=me → list.
+
+Chat (WS)
+
+ws://.../ws/chat/{application_id}/ send/receive messages.
+
+8) Backend Implementation Notes
+Project layout
+backend/
+  config/              # ASGI, settings, JWT, Channels
+  api/
+    auth.py            # login/register
+    users.py           # profile, resume upload
+    jobs.py            # CRUD, search
+    applications.py    # apply, ranking
+    interviews.py      # schedule
+    chat.py            # websocket consumers
+  ml/
+    resume_parser.py
+    embeddings.py
+    ranking.py
+  es/
+    client.py          # ES client factory
+    indices.py         # create mappings
+    repositories.py    # CRUD wrappers (UsersRepo, JobsRepo, ...)
+  storage/
+    files.py           # local/S3 save & signed URLs
+  common/
+    security.py        # password hashing (argon2/bcrypt), JWT
+    utils.py
+requirements.txt
+
+Elasticsearch mappings (snippets)
+// users mapping
+{
+  "mappings": {
+    "properties": {
+      "id": {"type": "keyword"},
+      "role": {"type": "keyword"},
+      "email": {"type": "keyword"},
+      "password_hash": {"type": "keyword"},
+      "full_name": {"type": "text"},
+      "headline": {"type": "text"},
+      "skills": {"type": "keyword"},
+      "experience_years": {"type": "integer"},
+      "location": {"type": "keyword"},
+      "resume_file_path": {"type": "keyword"},
+      "resume_text": {"type": "text"},
+      "resume_vec": {"type": "dense_vector", "dims": 384, "index": true, "similarity": "cosine"},
+      "created_at": {"type": "date"},
+      "updated_at": {"type": "date"}
+    }
+  }
+}
+
+// jobs mapping
+{
+  "mappings": {
+    "properties": {
+      "id": {"type": "keyword"},
+      "recruiter_id": {"type": "keyword"},
+      "title": {"type": "text"},
+      "description": {"type": "text"},
+      "company": {"type": "keyword"},
+      "skills_required": {"type": "keyword"},
+      "min_exp": {"type": "integer"},
+      "location": {"type": "keyword"},
+      "employment_type": {"type": "keyword"},
+      "job_vec": {"type": "dense_vector", "dims": 384, "index": true, "similarity": "cosine"},
+      "created_at": {"type": "date"},
+      "status": {"type": "keyword"}
+    }
+  }
+}
+
+Ranking (Python sketch, inside ml/ranking.py)
+def final_score(bm25, semantic, rule_boost):
+    return 0.4 * bm25 + 0.5 * semantic + 0.1 * rule_boost
+
+def jaccard(a, b):
+    a, b = set(a), set(b)
+    return len(a & b) / max(1, len(a | b))
+
+def rule_boost(skills_resume, skills_job, exp_resume, exp_min, same_location):
+    overlap = jaccard(skills_resume, skills_job)
+    exp_penalty = max(0, 1 - abs((exp_resume or 0) - (exp_min or 0)) / 10)
+    location_bonus = 1.0 if same_location else 0.8
+    return 0.6*overlap + 0.3*exp_penalty + 0.1*location_bonus
+
+Hybrid ES query (simplified, per job → candidates)
+
+BM25: query_string on resume_text, skills, headline.
+
+Semantic: knn over resume_vec using job_vec.
+
+Merge in Django: normalize scores 0–1, compute final, store in applications.scores.
