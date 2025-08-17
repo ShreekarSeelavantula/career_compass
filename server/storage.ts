@@ -12,9 +12,21 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private users: Map<string, User>;
+  private sessions: Map<string, string>; // token -> userId
 
   constructor() {
     this.users = new Map();
+    this.sessions = new Map();
+  }
+
+  setSession(token: string, userId: string) {
+    this.sessions.set(token, userId);
+  }
+
+  getUserByToken(token: string): Promise<User | undefined> {
+    const userId = this.sessions.get(token);
+    if (!userId) return Promise.resolve(undefined);
+    return this.getUser(userId);
   }
 
   async getUser(id: string): Promise<User | undefined> {

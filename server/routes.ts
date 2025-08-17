@@ -17,6 +17,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.createUser(userData);
       const token = randomUUID(); // Simple token for demo
+      storage.setSession(token, user.id);
       
       res.json({ 
         user: {
@@ -46,6 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const token = randomUUID(); // Simple token for demo
+      storage.setSession(token, user.id);
       
       res.json({ 
         user: {
@@ -66,13 +68,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // User profile route
-  app.get('/api/me', (req, res) => {
-    // Mock user data for now
+  app.get('/api/me', async (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const user = await storage.getUserByToken(token);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
     res.json({
-      id: "user-123",
-      email: "user@example.com",
-      full_name: "John Doe",
-      role: "seeker"
+      id: user.id,
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
+      headline: user.headline,
+      location: user.location,
+      skills: user.skills,
+      resume_file_path: user.resume_file_path
     });
   });
 
@@ -108,6 +123,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/interviews/me', (req, res) => {
     // Return empty array for interviews
     res.json([]);
+  });
+
+  // Job search route
+  app.get('/api/jobs/search', (req, res) => {
+    // Return empty array for now
+    res.json([]);
+  });
+
+  // Resume upload route
+  app.post('/api/me/resume', async (req, res) => {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const user = await storage.getUserByToken(token);
+    if (!user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    // Mock successful upload for now
+    res.json({ message: 'Resume uploaded successfully' });
   });
 
   // Chat/WebSocket will be handled separately
