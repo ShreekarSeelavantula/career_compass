@@ -103,7 +103,7 @@ export default function JobSeekerDashboard() {
 
   // Apply to job mutation
   const applyMutation = useMutation({
-    mutationFn: (jobId: string) => api.post(`/api/jobs/${jobId}/apply`),
+    mutationFn: (jobId: string) => api.post("/api/applications", { job_id: jobId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/applications/me"] });
       toast({
@@ -202,7 +202,7 @@ export default function JobSeekerDashboard() {
                         currentFile={resumeFile}
                         uploadProgress={uploadProgress}
                         uploadStatus={uploadStatus}
-                        error={uploadError}
+                        error={uploadError || undefined}
                       />
                       {resumeFile && uploadStatus === 'idle' && (
                         <Button

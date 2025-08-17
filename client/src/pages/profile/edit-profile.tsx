@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -44,15 +44,15 @@ export default function EditProfile() {
   const form = useForm<ProfileData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      full_name: profile?.full_name || "",
-      headline: profile?.headline || "",
-      location: profile?.location || "",
-      experience_years: profile?.experience_years || undefined,
+      full_name: "",
+      headline: "",
+      location: "",
+      experience_years: undefined,
     },
   });
 
   // Update form when profile data loads
-  React.useEffect(() => {
+  useEffect(() => {
     if (profile) {
       form.reset({
         full_name: profile.full_name || "",
@@ -64,7 +64,7 @@ export default function EditProfile() {
     }
   }, [profile, form]);
 
-  const [skills, setSkills] = useState<string[]>(profile?.skills || []);
+  const [skills, setSkills] = useState<string[]>([]);
 
   const {
     file: resumeFile,
@@ -96,7 +96,7 @@ export default function EditProfile() {
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: ProfileData & { skills: string[] }) => {
-      const response = await apiRequest("PUT", "/api/me/update", data);
+      const response = await apiRequest("PUT", "/api/me", data);
       return response.json();
     },
     onSuccess: () => {
@@ -149,6 +149,8 @@ export default function EditProfile() {
   const handleResumeUpload = () => {
     uploadFile();
   };
+
+
 
   if (!user) return null;
 
@@ -343,7 +345,7 @@ export default function EditProfile() {
                       currentFile={resumeFile}
                       uploadProgress={uploadProgress}
                       uploadStatus={uploadStatus}
-                      error={uploadError}
+                      error={uploadError || undefined}
                     />
                     
                     {resumeFile && uploadStatus === 'idle' && (
@@ -364,7 +366,7 @@ export default function EditProfile() {
                       currentFile={resumeFile}
                       uploadProgress={uploadProgress}
                       uploadStatus={uploadStatus}
-                      error={uploadError}
+                      error={uploadError || undefined}
                     />
                     
                     {resumeFile && uploadStatus === 'idle' && (

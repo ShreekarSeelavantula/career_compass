@@ -122,8 +122,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/jobs', (req, res) => {
-    res.status(501).json({ error: 'Not implemented yet' });
+  app.post('/api/jobs', async (req, res) => {
+    try {
+      const job = await storage.createJob({
+        ...req.body,
+        recruiter_id: req.body.recruiter_id || "system",
+      });
+      res.status(201).json(job);
+    } catch (error) {
+      console.error('Create job error:', error);
+      res.status(400).json({ error: error.message });
+    }
   });
 
   // Applications routes

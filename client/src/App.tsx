@@ -11,6 +11,7 @@ import Register from "@/pages/auth/register";
 import JobSeekerDashboard from "@/pages/dashboard/job-seeker";
 import RecruiterDashboard from "@/pages/dashboard/recruiter";
 import EditProfile from "@/pages/profile/edit-profile";
+import SettingsPage from "@/pages/profile/settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
       <Route path="/dashboard/job-seeker" component={JobSeekerDashboard} />
       <Route path="/dashboard/recruiter" component={RecruiterDashboard} />
       <Route path="/profile/edit" component={EditProfile} />
+      <Route path="/profile/settings" component={SettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );

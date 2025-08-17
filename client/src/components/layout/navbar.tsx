@@ -196,14 +196,18 @@ export default function Navbar({ className = "" }: NavbarProps) {
                   <p className="text-xs text-gray-500" data-testid="dropdown-user-email">{user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem data-testid="dropdown-profile">
-                  <User className="mr-2 h-4 w-4" />
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem data-testid="dropdown-settings">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </DropdownMenuItem>
+                <Link href="/profile/edit">
+                  <DropdownMenuItem data-testid="dropdown-profile">
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </DropdownMenuItem>
+                </Link>
+                <Link href="/profile/settings">
+                  <DropdownMenuItem data-testid="dropdown-settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </DropdownMenuItem>
+                </Link>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} data-testid="dropdown-logout">
                   <LogOut className="mr-2 h-4 w-4" />
